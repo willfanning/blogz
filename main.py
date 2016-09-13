@@ -4,7 +4,8 @@ from models import Post, User
 import hashutils
 
 template_dir = os.path.join(os.path.dirname(__file__), 'templates')
-jinja_env = jinja2.Environment(loader = jinja2.FileSystemLoader(template_dir), autoescape = True)
+jinja_env = jinja2.Environment(loader=jinja2.FileSystemLoader(template_dir), autoescape=True)
+
 
 class BlogHandler(webapp2.RequestHandler):
     """ Utility class for gathering various useful methods that are used by most request handlers """
@@ -19,9 +20,9 @@ class BlogHandler(webapp2.RequestHandler):
             Get all posts by a specific user, ordered by creation date (descending).
             The user parameter will be a User object.
         """
-
-        # TODO - filter the query so that only posts by the given user
-        return None
+        query = db.Query(Post)
+        q = query.filter('author =', user)
+        return q.fetch(limit=limit, offset=offset)
 
     def get_user_by_name(self, username):
         """ Get a user object from the db, based on their username """
@@ -60,14 +61,16 @@ class BlogHandler(webapp2.RequestHandler):
         if not self.user and self.request.path in auth_paths:
             self.redirect('/login')
 
+
 class IndexHandler(BlogHandler):
 
     def get(self):
         """ List all blog users """
         users = User.all()
         t = jinja_env.get_template("index.html")
-        response = t.render(users = users)
+        response = t.render(users=users)
         self.response.write(response)
+
 
 class BlogIndexHandler(BlogHandler):
 
@@ -114,6 +117,7 @@ class BlogIndexHandler(BlogHandler):
                     next_page=next_page)
         self.response.out.write(response)
 
+
 class NewPostHandler(BlogHandler):
 
     def render_form(self, title="", body="", error=""):
@@ -146,6 +150,7 @@ class NewPostHandler(BlogHandler):
             error = "we need both a title and a body!"
             self.render_form(title, body, error)
 
+
 class ViewPostHandler(BlogHandler):
 
     def get(self, id):
@@ -161,6 +166,7 @@ class ViewPostHandler(BlogHandler):
             response = t.render(error=error)
 
         self.response.out.write(response)
+
 
 class SignupHandler(BlogHandler):
 
@@ -224,7 +230,7 @@ class SignupHandler(BlogHandler):
         if existing_user:
             errors['username_error'] = "A user with that username already exists"
             has_error = True
-        elif (username and password and verify and (email is not None) ):
+        elif username and password and verify and email is not None:
 
             # create new user object and store it in the database
             pw_hash = hashutils.make_pw_hash(username, password)
@@ -255,9 +261,10 @@ class SignupHandler(BlogHandler):
         else:
             self.redirect('/blog/newpost')
 
+
 class LoginHandler(BlogHandler):
 
-    # TODO - The login code here is mostly set up for you, but there isn't a template to log in
+
 
     def render_login_form(self, error=""):
         """ Render the login form with or without an error, based on parameters """
@@ -282,6 +289,7 @@ class LoginHandler(BlogHandler):
             self.redirect('/blog/newpost')
         else:
             self.render_login_form(error="Invalid password")
+
 
 class LogoutHandler(BlogHandler):
 

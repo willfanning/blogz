@@ -8,22 +8,38 @@
 
 <h2><a href="/blog/{{ post.key().id() }}">{{ post.title }}</a></h2>
 <p>{{ post.body }}</p>
-
+<!-- TODO add author w/ link to author's blog page -->
 <p class="post-author"> written by
-    <a href="/blog/{{ post.author.get(post.author.key()).username }}">{{ post.author.get(post.author.key()).username }}</a>
+    <a href="/blog/{{ username }}">{{ username }}</a>
 </p>
 {% endfor %}
 
-{% if prev_page %}
-<a href="/blog?page={{ prev_page }}">&lt; prev</a>
+{% if username %}
+    {% if prev_page %}
+    <a href="/blog/{{ username }}?page={{ prev_page }}">&lt; prev</a>
+    {% endif %}
+
+    {% if prev_page and next_page %}
+    &nbsp;&nbsp; | &nbsp;&nbsp;
+    {% endif %}
+
+    {% if next_page %}
+    <a href="/blog/{{ username }}?page={{ next_page }}">next &gt;</a>
+    {% endif %}
 {% endif %}
 
-{% if prev_page and next_page %}
-&nbsp;&nbsp; | &nbsp;&nbsp;
-{% endif %}
+{% if not username %}
+    {% if prev_page %}
+    <a href="/blog?page={{ prev_page }}">&lt; prev</a>
+    {% endif %}
 
-{% if next_page %}
-<a href="/blog?page={{ next_page }}">next &gt;</a>
+    {% if prev_page and next_page %}
+    &nbsp;&nbsp; | &nbsp;&nbsp;
+    {% endif %}
+
+    {% if next_page %}
+    <a href="/blog?page={{ next_page }}">next &gt;</a>
+    {% endif %}
 {% endif %}
 
 {% endblock %}
